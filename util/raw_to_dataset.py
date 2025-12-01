@@ -10,9 +10,13 @@ def sort_by_centroid(points):
     sorted_indices = np.argsort(distances)
     return points_arr[sorted_indices].tolist()
 
+def get_centroid(points):
+    points_arr = np.array(points)
+    return np.mean(points_arr, axis=0)
+
 
 def set_first_as_origin(points):
-    """Subtracts first point value from every point to treat it as the origin."""
+    """Treat first point as (0,0,0) - Subtracts first point value from every point."""
     points_copy = points.copy()
     origin = (points_copy[0][0], points_copy[0][1], points_copy[0][2])
 
@@ -27,20 +31,21 @@ def set_first_as_origin(points):
     return points_copy
     
 
-
 def load_gesture_xyz(filepath, use_centroid=True):
     """Load a single gesture JSON file and return list of (x, y, z) points."""
     with open(filepath, 'r') as f:
         data = json.load(f)
     
     points = [(p['x'], p['y'], p['z']) for p in data['points']]
+
     # Preprocessing + normalization steps
-    points = set_first_as_origin(points)
+    points = set_first_as_origin(points) # Take 1st point as (0,0,0), update other points relative
 
     if (use_centroid):
         points = sort_by_centroid(points)
                 
     return points
+
 
 def build_npz_dataset(dataset_root, output_file='gesture_dataset.npz', use_centroid=True):
     """
@@ -66,7 +71,7 @@ def build_npz_dataset(dataset_root, output_file='gesture_dataset.npz', use_centr
         for file_name in os.listdir(class_path):
             if file_name.endswith('.json'):
                 filepath = os.path.join(class_path, file_name)
-                points = load_gesture_xyz(filepath, use_centroid=False)
+                points = load_gesture_xyz(filepath, use_centroid=True)
 
                 if points:
                     X.append(points)
@@ -88,7 +93,7 @@ def build_npz_dataset(dataset_root, output_file='gesture_dataset.npz', use_centr
     print(f"Total gestures: {len(X)}")
     return X, y, class_to_label
 
-if __name__ == "main":
+if __name__ == "__main__":
     # dataset_root = os.path.join('..', 'gesture_dataset_RAW')
     dataset_root = 'gesture_dataset_RAW'
     X, y, class_to_label = build_npz_dataset(dataset_root, output_file='gesture_dataset.npz')
