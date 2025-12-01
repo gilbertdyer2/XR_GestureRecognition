@@ -1,0 +1,17 @@
+# Assuming you're using Python 3.12
+# You can install to any environment using `pip install -r requirements.txt`
+jupyter
+jupyterlab
+jupyterlab_widgets
+matplotlib
+pandas
+opencv-python
+scikit-learn
+tensorflow
+tensorflow_datasets
+keras-nlp
+torch
+boto3
+gym
+numpy
+# tqdmc
