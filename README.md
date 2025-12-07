@@ -7,11 +7,9 @@ The model is also order-invariant, so it ignores the drawn order of a shape's po
 
 
 ## Note for CSCI4366:
-Specific to CSCI4366, the scope of this project is narrowed on applying the tool to a simple city-builder AR game for the Meta Quest, PicoTown. The dataset and models are "overfit" to wireframe drawings of various building-like shapes (house, apartment, etc.. See gesture_dataset_RAW). 
+Specific to CSCI4366, the scope of this project is narrowed on applying the tool to a simple city-builder AR game for the Meta Quest, PicoTown. A core mechanic of the game is to allow the player to draw a custom building wireframe, then spawn in the closest matching building asset to the shape. As of now, the dataset and models are a bit "overfit" to wireframe drawings of various building-like shapes (house, apartment, etc.. See gesture_dataset_RAW) due to data collection being pretty tedious (the dataset is also very small currently, but still seems to work well for the game).
 
-The dataset is fairly small and hand-collected . Because testing the game requires a Meta Quest, I've provided a script in utils/ to visualize the data the model was trained on, as well as a 
-
-
+Unfortunately the game itself is not finished as of the most recent commit and also requires a Meta Quest to run, but the model architecture is fully complete. I've provided a script (visualize_data) in utils/ to visualize the data the model was trained on, and a script to test the model's effectiveness on(test_trained_fromJSON) sample data of drawings of buildings, separately recorded from the dataset.
 
 
 
