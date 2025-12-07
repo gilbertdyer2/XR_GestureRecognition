@@ -2,17 +2,71 @@ import os
 import json
 import numpy as np
 
-def sort_by_centroid(points):
-    """Sort a list of points by distance from their centroid."""
-    points_arr = np.array(points)  # shape: (N,3)
-    centroid = np.mean(points_arr, axis=0)
-    distances = np.linalg.norm(points_arr - centroid, axis=1)
-    sorted_indices = np.argsort(distances)
-    return points_arr[sorted_indices].tolist()
+def resample_points(points, num_points):
+    """
+    Resamples a list of points to exactly num_points
+        - linear interpolation over cumulative path distance.
+        - For 1D gestures/strokes
+    """
+    pts = np.array(points)
+    N = len(pts)
 
-def get_centroid(points):
-    points_arr = np.array(points)
-    return np.mean(points_arr, axis=0)
+    if N == 0:
+        return np.zeros((num_points, 3))  # edge case
+    if N == 1:
+        return np.repeat(pts, num_points, axis=0) # repeat
+
+    # Compute cumulative distance along the path
+    deltas = pts[1:] - pts[:-1]
+    segment_lengths = np.linalg.norm(deltas, axis=1)
+    cumulative = np.insert(np.cumsum(segment_lengths), 0, 0)
+    total_len = cumulative[-1]
+
+    # Create equally spaced target distances
+    target_distances = np.linspace(0, total_len, num_points)
+
+    # Interpolate separately for x, y, z
+    resampled = np.zeros((num_points, 3))
+    for dim in range(3):
+        resampled[:, dim] = np.interp(
+            target_distances,
+            cumulative,
+            pts[:, dim]
+        )
+
+    return resampled.tolist()
+
+
+def sample_points_fixed(points, N=128, seed=None):
+    """
+    Uniformly sample a point list to exactly N points.
+    - If len(points) > N: uniform downsample
+    - If len(points) < N: randomly repeat some points
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    points = np.array(points)
+    L = len(points)
+
+    if L == 0:
+        raise ValueError("Cannot sample from an empty point list.")
+
+    # Case 1: More than N, downsample
+    if L > N:
+        idx = np.linspace(0, L - 1, N, dtype=int)
+        return points[idx].tolist()
+
+    # Case 2: Less than N, pad with random repeats
+    if L < N:
+        needed = N - L
+        repeat_idx = np.random.choice(L, size=needed, replace=True)
+
+        padded = np.concatenate([points, points[repeat_idx]], axis=0)
+        return padded.tolist()
+    
+    # Case 3: Already exactly N
+    return points.tolist()
 
 
 def set_first_as_origin(points):
@@ -31,7 +85,7 @@ def set_first_as_origin(points):
     return points_copy
     
 
-def load_gesture_xyz(filepath, use_centroid=True):
+def load_gesture_xyz(filepath):
     """Load a single gesture JSON file and return list of (x, y, z) points."""
     with open(filepath, 'r') as f:
         data = json.load(f)
@@ -40,14 +94,12 @@ def load_gesture_xyz(filepath, use_centroid=True):
 
     # Preprocessing + normalization steps
     points = set_first_as_origin(points) # Take 1st point as (0,0,0), update other points relative
-
-    if (use_centroid):
-        points = sort_by_centroid(points)
+    points = sample_points_fixed(points, 128) # Resize to 128 points
                 
     return points
 
 
-def build_npz_dataset(dataset_root, output_file='gesture_dataset.npz', use_centroid=True):
+def build_npz_dataset(dataset_root, output_file='gesture_dataset.npz'):
     """
     Loads gesture dataset from folders and saves as a .npz file.
     
@@ -71,7 +123,7 @@ def build_npz_dataset(dataset_root, output_file='gesture_dataset.npz', use_centr
         for file_name in os.listdir(class_path):
             if file_name.endswith('.json'):
                 filepath = os.path.join(class_path, file_name)
-                points = load_gesture_xyz(filepath, use_centroid=True)
+                points = load_gesture_xyz(filepath)
 
                 if points:
                     X.append(points)

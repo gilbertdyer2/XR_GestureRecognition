@@ -1,5 +1,19 @@
 ## (WIP) XR_GestureRecognition 
-XR gesture recognition tool for Unity, built as a final project for a neural nets course. Work in progress, uses Siamese neural network to identify motion gestures (series of xyz coordinates of an XR controller over time), preventing the need for any specialized training of gestures and allowing for the creation of new gestures on-the-fly.
+This is an XR gesture recognition tool for Unity, useful for drawn 3D shape/drawing recognition or gesture recognition for order-invariant gestures. It uses a Siamese neural network which learns a similarity function for comparing 3D drawings as opposed to classification of a set amount of shapes. This means you can use the model straight out of the box without needing to train the model on custom 3D shapes and even create new gestures on-the-fly during runtime.
+
+As mentioned, this is a work-in-progress. The end goal is to train a generalized tool for gesture recognition and provide an interface for training the model.
+
+The model is also order-invariant, so it ignores the drawn order of a shape's points. For example, a square will be represented the same no matter the order its 4 edges are drawn in, and a circle drawn clockwise is equivalent to one drawn counter-clockwise. This is done by using pairwise distance matrices as input to the model instead of a sequenced 1D list of points.
+
+
+## Note for CSCI4366:
+Specific to CSCI4366, the scope of this project is narrowed on applying the tool to a simple city-builder AR game for the Meta Quest, PicoTown. The dataset and models are "overfit" to wireframe drawings of various building-like shapes (house, apartment, etc.. See gesture_dataset_RAW). 
+
+The dataset is fairly small and hand-collected . Because testing the game requires a Meta Quest, I've provided a script in utils/ to visualize the data the model was trained on, as well as a 
+
+
+
+
 
 ## Project Contributors:
 Gilbert Dyer (@gilbertdyer2)
