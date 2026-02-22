@@ -6,6 +6,8 @@ As mentioned, this is a work-in-progress. The end goal is to train a generalized
 
 The model is also order-invariant, so it ignores the drawn order of a shape's points. For example, a square will be represented the same no matter the order its 4 edges are drawn in, and a circle drawn clockwise is equivalent to one drawn counter-clockwise. This is done by using pairwise distance matrices as input to the model instead of a sequenced 1D list of points.
 
+
+
 Below is a short trailer for a project I built that uses DrawRec3D. The project is a a mixed-reality city building game with a core mechanic that allows the user to draw buildings, then replaces the drawing with the closest matching asset from a stored library of buildings.
 
 
